@@ -18,10 +18,10 @@ jobs:
       HAS_GMAIL: ${{ secrets.GMAIL_ADDRESS != '' && secrets.GMAIL_APP_PASSWORD != '' }}
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
