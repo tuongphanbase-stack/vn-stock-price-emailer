@@ -863,16 +863,48 @@ def should_send(prices, previous_prices):
 # --- Historical tracking + weekly trend -------------------------------------
 
 
+HISTORY_KEEP_DAYS = 30  # the weekly trend needs 7; a margin on top
+
+
 def append_history(prices):
-    """Appends this run's closes to a CSV: timestamp,ticker,close"""
-    is_new_file = not os.path.exists(HISTORY_FILE)
-    with open(HISTORY_FILE, "a", newline="") as f:
+    """Appends this run's closes to a CSV: timestamp,ticker,close
+
+    Only closes that differ from the ticker's last logged close are added
+    (outside trading hours nearly every run repeated the same price), and
+    rows older than HISTORY_KEEP_DAYS are dropped - except each ticker's
+    newest row, so an unchanged price is never forgotten. Without this the
+    file grew by ~12,000 rows a day, committed every 30 minutes.
+    """
+    rows = []
+    if os.path.exists(HISTORY_FILE):
+        with open(HISTORY_FILE, newline="") as f:
+            rows = [r for r in csv.reader(f)][1:]
+
+    last_close = {}
+    for r in rows:
+        if len(r) == 3:
+            last_close[r[1]] = r[2]
+
+    ts = now_vn().strftime("%Y-%m-%d %H:%M")
+    for ticker, vals in prices.items():
+        close = str(vals["close"])
+        if last_close.get(ticker) != close:
+            rows.append([ts, ticker, close])
+            last_close[ticker] = close
+
+    # Timestamps are "YYYY-MM-DD HH:MM", so string comparison is date order.
+    cutoff = (now_vn() - timedelta(days=HISTORY_KEEP_DAYS)).strftime("%Y-%m-%d %H:%M")
+    newest_index = {}
+    for i, r in enumerate(rows):
+        if len(r) == 3:
+            newest_index[r[1]] = i
+    keep = set(newest_index.values())
+    rows = [r for i, r in enumerate(rows) if len(r) == 3 and (r[0] >= cutoff or i in keep)]
+
+    with open(HISTORY_FILE, "w", newline="") as f:
         writer = csv.writer(f)
-        if is_new_file:
-            writer.writerow(["timestamp", "ticker", "close"])
-        ts = now_vn().strftime("%Y-%m-%d %H:%M")
-        for ticker, vals in prices.items():
-            writer.writerow([ts, ticker, vals["close"]])
+        writer.writerow(["timestamp", "ticker", "close"])
+        writer.writerows(rows)
 
 
 def weekly_trend_data():
