@@ -3,9 +3,9 @@
 Emails a summary of Vietnam's top stocks by market cap (HOSE/HNX/UPCOM)
 plus VN-Index / HNX-Index / UPCOM-Index, in Vietnamese, as a styled HTML
 email. Same shape as its siblings
-[currency-rate-emailer](https://github.com/tuongphanbase-stack/currency-rate-emailer),
-[gold-price-emailer](https://github.com/tuongphanbase-stack/gold-price-emailer), and
-[tech-price-mailer](https://github.com/tuongphanbase-stack/tech-price-mailer): runs
+[currency-rate-emailer](https://github.com/tuongphanbase/currency-rate-emailer),
+[gold-price-emailer](https://github.com/tuongphanbase/gold-price-emailer), and
+[tech-price-mailer](https://github.com/tuongphanbase/tech-price-mailer): runs
 on GitHub Actions on a schedule, no server to keep on, pulls from a few
 independent free sources and degrades gracefully if one is down.
 
